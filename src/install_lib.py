@@ -43,9 +43,10 @@ class InstallLib():
         return cmd
 
     def get_configure_cmd(self):
-        cmd = 'genfstab -U /mnt > /mnt/etc/fstab'
-
-        cmd += ' && rm -r /mnt/etc/systemd/{journald.conf.d,logind.conf.d}'
+        cmd = (
+            'genfstab -U /mnt > /mnt/etc/fstab'
+            + ' && rm -r /mnt/etc/systemd/{journald.conf.d,logind.conf.d}'
+        )
         cmd += ' && rm -rf /mnt/etc/systemd/system/{pacman-init.service,etc-pacman.d-gnupg.mount,getty@tty1.service.d}'
         cmd += ' && rm -rf /mnt/etc/systemd/system/multi-user.target.wants/pacman-init.service'
         cmd += ' && rm /mnt/etc/mkinitcpio.d/*'
@@ -55,8 +56,8 @@ class InstallLib():
         cmd += ' && echo \'%wheel ALL=(ALL) ALL\' >> /mnt/etc/sudoers'
 
         cmd += ' && echo \'' + \
-            hostname_lib.hostname.replace('\'', '') + \
-            '\' > /mnt/etc/hostname'
+                hostname_lib.hostname.replace('\'', '') + \
+                '\' > /mnt/etc/hostname'
 
         cmd += ' && arch-chroot /mnt /bin/bash -c \''
 
@@ -95,22 +96,24 @@ class InstallLib():
 
         cmd += ' && sed -i \"s/^\\\\(GRUB_CMDLINE_LINUX_DEFAULT=\\\\).*/\\1\\\"loglevel=3 quiet'
         if swap_crypt_uuid != '':
-            cmd += ' rd.luks.name=' + swap_crypt_uuid + '=swap'
+            cmd += f' rd.luks.name={swap_crypt_uuid}=swap'
         if swap_uuid != '':
-            cmd += ' resume=UUID=' + swap_uuid
+            cmd += f' resume=UUID={swap_uuid}'
         if crypt_uuid != '':
-            cmd += ' rd.luks.name=' + crypt_uuid + '=cryptroot' + \
-                ' root=\\/dev\\/mapper\\/cryptroot'
+            cmd += (
+                f' rd.luks.name={crypt_uuid}=cryptroot'
+                + ' root=\\/dev\\/mapper\\/cryptroot'
+            )
         cmd += '\\\"/\" /etc/default/grub'
 
         cmd += ' && sed -i \"s/^\\\\(HOOKS=\\\\).*/\\1(base systemd' + \
-            ' keyboard autodetect sd-vconsole modconf block sd-encrypt' + \
-            ' filesystems fsck)/\" /etc/mkinitcpio.conf'
+                ' keyboard autodetect sd-vconsole modconf block sd-encrypt' + \
+                ' filesystems fsck)/\" /etc/mkinitcpio.conf'
         cmd += ' && rm /etc/mkinitcpio.conf.d/archiso.conf'
 
         # Generate preset and mkinitcpio
         cmd += ' && for module in /usr/lib/modules/*; do echo $module/vmlinuz' + \
-               ' | sudo /usr/share/libalpm/scripts/mkinitcpio install; done'
+                   ' | sudo /usr/share/libalpm/scripts/mkinitcpio install; done'
 
         grub_i386_target = ''
         if partition_lib.boot_target != '':
@@ -123,10 +126,10 @@ class InstallLib():
         grub_i386_target = partition_lib.get_disk_from_part(grub_i386_target)
 
         cmd += ' && (grub-install --target=i386-pc \"' + grub_i386_target + \
-            '\" || true)'
+                '\" || true)'
 
         cmd += ' && (grub-install --target=x86_64-efi --efi-directory=/boot' + \
-            ' --bootloader-id=grub || true)'
+                ' --bootloader-id=grub || true)'
 
         cmd += ' && grub-mkconfig -o /boot/grub/grub.cfg'
 

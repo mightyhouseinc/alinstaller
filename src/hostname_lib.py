@@ -18,8 +18,9 @@ class HostnameLib():
         self.generate()
 
     def generate(self):
-        new_hostname = 'arch-' + \
-            ''.join(random.choice('0123456789abcdef') for x in range(8))
+        new_hostname = 'arch-' + ''.join(
+            random.choice('0123456789abcdef') for _ in range(8)
+        )
         self.hostname = new_hostname
         return new_hostname
 

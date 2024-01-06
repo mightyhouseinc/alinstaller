@@ -84,11 +84,8 @@ class LanguageGUI(GUIStep):
     def _row_activated(self, box, row, selects):
         index = row.get_index()
 
-        i = 0
-        for x in selects:
+        for i, x in enumerate(selects):
             x(i == index)
-            i += 1
-
         lang = language_lib.languages[index][0]
         language_lib.install(lang)
         gui.update_text()

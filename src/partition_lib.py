@@ -31,10 +31,7 @@ class PartitionMenuItem():
         self.text = text
         self.size_text = size_text
         self.details_text = details_text
-        if ops is None:
-            self.ops = []
-        else:
-            self.ops = ops
+        self.ops = [] if ops is None else ops
 
 
 class PartitionLib():
@@ -58,7 +55,7 @@ class PartitionLib():
         self.scanned = False
 
     def __str__(self):
-        return str(json.dumps(self.parts, sort_keys=True))
+        return json.dumps(self.parts, sort_keys=True)
 
     def _action_autosetup(self, name, size, parttable, crypt=False,
                           passphrase=''):
@@ -66,7 +63,7 @@ class PartitionLib():
         boot_end = boot_start + self.boot_part_size - 1
         root_start = boot_end + 1
         root_end = size - psutil.virtual_memory().total - \
-            self.part_granularity
+                self.part_granularity
         root_end = self._to_gran_end(root_end) * self.part_granularity - 1
         swap_start = root_end + 1
 
@@ -90,35 +87,32 @@ class PartitionLib():
                 f.write(passphrase)
 
         cmd = 'parted -m -s \'' + name + '\' unit B mklabel \'' + \
-            parttable + '\''
+                parttable + '\''
         if parttable == 'gpt':
-            cmd += ' mkpart ESP fat32 ' + str(boot_start) + 'B ' + \
-                str(boot_end) + 'B'
+            cmd += f' mkpart ESP fat32 {str(boot_start)}B {str(boot_end)}B'
         else:
-            cmd += ' mkpart primary fat32 ' + str(boot_start) + 'B ' + \
-                str(boot_end) + 'B'
-        cmd += ' mkpart primary ' + self.default_filesystem + ' ' + \
-            str(root_start) + 'B ' + str(root_end) + 'B'
+            cmd += f' mkpart primary fat32 {str(boot_start)}B {str(boot_end)}B'
+        cmd += f' mkpart primary {self.default_filesystem} {str(root_start)}B {str(root_end)}B'
         cmd += ' set 1 boot on'
-        cmd += ' mkpart primary linux-swap ' + str(swap_start) + 'B 100%'
+        cmd += f' mkpart primary linux-swap {str(swap_start)}B 100%'
         cmd += ' && mkfs.fat -F32 \'' + self.get_part_from_disk_num(name, 1) + '\''
         if not crypt:
             cmd += ' && mkfs.ext4 \'' + self.get_part_from_disk_num(name, 2) + '\''
         else:
             cmd += ' && cryptsetup -v -q --key-file /tmp/alinstaller-keyfile luksFormat ' + \
-                '--type \'' + self.default_luks_type + '\' \'' + \
-                self.get_part_from_disk_num(name, 2) + '\''
+                    '--type \'' + self.default_luks_type + '\' \'' + \
+                    self.get_part_from_disk_num(name, 2) + '\''
             cmd += ' && cryptsetup -q --key-file /tmp/alinstaller-keyfile open \'' + \
-                self.get_part_from_disk_num(name, 2) + '\' cryptroot'
+                    self.get_part_from_disk_num(name, 2) + '\' cryptroot'
             cmd += ' && mkfs.ext4 /dev/mapper/cryptroot'
         if not crypt:
             cmd += ' && mkswap \'' + self.get_part_from_disk_num(name, 3) + '\''
         else:
             cmd += ' && cryptsetup -v -q --key-file /tmp/alinstaller-keyfile luksFormat ' + \
-                '--type \'' + self.default_luks_type + '\' \'' + \
-                self.get_part_from_disk_num(name, 3) + '\''
+                    '--type \'' + self.default_luks_type + '\' \'' + \
+                    self.get_part_from_disk_num(name, 3) + '\''
             cmd += ' && cryptsetup -q --key-file /tmp/alinstaller-keyfile open \'' + \
-                self.get_part_from_disk_num(name, 3) + '\' swap'
+                    self.get_part_from_disk_num(name, 3) + '\' swap'
             cmd += ' && mkswap /dev/mapper/swap'
 
         cmd += ' && echo Completed.'
@@ -277,16 +271,23 @@ class PartitionLib():
         start_str = str(gran_start) + self.part_granularity_unit
         end_str = str(gran_end) + self.part_granularity_unit
 
-        menu.append(PartitionMenuItem(
-            name='*' + parent_name + '*' + start_str + '*' + end_str,
-            size=end - start + 1,
-            text=pref + _('Free Space'),
-            size_text=self._format_size(end - start + 1),
-            details_text=_('Size: ') + self._format_size(end - start + 1) + '\n' +
-            _('Start: ') + str(start) + '\n' +
-            _('End: ') + str(end),
-            ops=['part']
-        ))
+        menu.append(
+            PartitionMenuItem(
+                name=f'*{parent_name}*{start_str}*{end_str}',
+                size=end - start + 1,
+                text=pref + _('Free Space'),
+                size_text=self._format_size(end - start + 1),
+                details_text=_('Size: ')
+                + self._format_size(end - start + 1)
+                + '\n'
+                + _('Start: ')
+                + str(start)
+                + '\n'
+                + _('End: ')
+                + str(end),
+                ops=['part'],
+            )
+        )
 
     def _add_other_to_menu(self, menu, pref, name, item, size, *args, **kwargs):
         menu.append(PartitionMenuItem(
@@ -355,7 +356,7 @@ class PartitionLib():
                 universal_newlines=True
             )
             partition_gui.add_log_lib(msg)
-            partition_gui.add_log_lib('- ' + cmd)
+            partition_gui.add_log_lib(f'- {cmd}')
             for x in p.stdout:
                 partition_gui.add_log_lib(x.rstrip('\n'))
 
@@ -363,9 +364,9 @@ class PartitionLib():
         units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
         for x in units[:-1]:
             if size < self.base:
-                return str(size) + ' ' + x
+                return f'{str(size)} {x}'
             size //= self.base
-        return str(size) + ' ' + units[-1]
+        return f'{str(size)} {units[-1]}'
 
     def _get_layout_menu_noscan(self, parts=None, parent=None, level=0):
         if parts is None:
@@ -460,10 +461,7 @@ class PartitionLib():
                 x['end'] = str(x['end'])
 
     def _remove_toplevel_mounted(self, p):
-        rm = []
-        for x in p:
-            if 'mountpoint' in x and x['mountpoint'] is not None:
-                rm.append(x)
+        rm = [x for x in p if 'mountpoint' in x and x['mountpoint'] is not None]
         for x in rm:
             p.remove(x)
 
@@ -578,9 +576,7 @@ class PartitionLib():
         i -= 1
         while i >= 0 and name[i].isdigit():
             i -= 1
-        if name.startswith('/dev/nvme'):
-            return name[:i]
-        return name[:i + 1]
+        return name[:i] if name.startswith('/dev/nvme') else name[:i + 1]
 
     def get_layout_menu(self, scan=False):
         if scan:
@@ -600,7 +596,7 @@ class PartitionLib():
 
     def get_part_from_disk_num(self, disk, num):
         if disk.startswith('/dev/nvme'):
-            return disk + 'p' + str(num)
+            return f'{disk}p{str(num)}'
         return disk + str(num)
 
     def get_text_for_op(self, op):
@@ -642,9 +638,7 @@ class PartitionLib():
             return _('Clear Swap Encryption Target')
         if op == 'clear-swap-target':
             return _('Clear Swap Target')
-        if op == 'refresh':
-            return _('Refresh Partition List')
-        return op
+        return _('Refresh Partition List') if op == 'refresh' else op
 
     def scan(self):
         self._scan_for_all_disks()
