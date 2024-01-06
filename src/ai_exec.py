@@ -34,7 +34,7 @@ def ai_dialog_exec(*args, **kwargs):
         myargs['msg'] += '\n\n'
 
     if myargs['showcmd']:
-        myargs['msg'] += '- ' + args[0]
+        myargs['msg'] += f'- {args[0]}'
 
     proc = ai_popen(*args, **kwargs,
                     stdin=subprocess.DEVNULL,

@@ -308,9 +308,7 @@ class PartitionGUI(GUIStep):
             self._lib_loop_add(False, self._update_actions_lib, menu[index])
 
     def _update_actions_lib(self, item):
-        actions = []
-        for x in item.ops:
-            actions.append(partition_lib.get_text_for_op(x))
+        actions = [partition_lib.get_text_for_op(x) for x in item.ops]
         gui.idle_add(self._update_actions, item, actions)
 
     def _update_actions(self, item, actions):
@@ -437,7 +435,7 @@ class PartitionGUI(GUIStep):
 
         gui.builder.get_object('entry_autosetup_type').grab_focus()
         dialog = gui.builder.get_object('dialog_autosetup')
-        dialog.set_title(text + ' - ' + action)
+        dialog.set_title(f'{text} - {action}')
 
         dialog.run()
         dialog.hide()
@@ -469,7 +467,7 @@ class PartitionGUI(GUIStep):
 
         gui.builder.get_object('entry_parttable').grab_focus()
         dialog = gui.builder.get_object('dialog_parttable')
-        dialog.set_title(text + ' - ' + action)
+        dialog.set_title(f'{text} - {action}')
 
         dialog.run()
         dialog.hide()
@@ -539,7 +537,7 @@ class PartitionGUI(GUIStep):
 
         gui.builder.get_object('entry_format').grab_focus()
         dialog = gui.builder.get_object('dialog_format')
-        dialog.set_title(text + ' - ' + action)
+        dialog.set_title(f'{text} - {action}')
 
         dialog.run()
         dialog.hide()
@@ -604,7 +602,7 @@ class PartitionGUI(GUIStep):
 
         gui.builder.get_object('entry_cryptsetup_passphrase').grab_focus()
         dialog = gui.builder.get_object('dialog_cryptsetup')
-        dialog.set_title(text + ' - ' + action)
+        dialog.set_title(f'{text} - {action}')
 
         dialog.run()
         dialog.hide()
@@ -633,7 +631,7 @@ class PartitionGUI(GUIStep):
 
         gui.builder.get_object('entry_cryptopen_passphrase').grab_focus()
         dialog = gui.builder.get_object('dialog_cryptopen')
-        dialog.set_title(text + ' - ' + action)
+        dialog.set_title(f'{text} - {action}')
 
         dialog.run()
         dialog.hide()
@@ -654,7 +652,7 @@ class PartitionGUI(GUIStep):
         dialog.set_transient_for(parent)
         dialog.set_destroy_with_parent(True)
         if title != '':
-            dialog.set_title(title + ' - ' + _('Confirm'))
+            dialog.set_title(f'{title} - ' + _('Confirm'))
         else:
             dialog.set_title(_('Confirm'))
         label = Gtk.Label(msg)

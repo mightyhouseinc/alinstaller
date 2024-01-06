@@ -21,7 +21,7 @@ class HostnameCLI(Step):
     def run_once(self):
         text = ''
 
-        while text == '':
+        while not text:
             res, text = dialog.inputbox(
                 text='Enter host name (leave empty to regenerate):',
                 init=hostname_lib.hostname,

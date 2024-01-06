@@ -102,10 +102,7 @@ class GUI():
             del self._button_next_hooks[page]
 
     def _get_number_from_page(self, name):
-        for i, page in enumerate(self._pages):
-            if page == name:
-                return i
-        return -1
+        return next((i for i, page in enumerate(self._pages) if page == name), -1)
 
     def _button_back_clicked(self, button_back, button_next):
         n = self._get_number_from_page(

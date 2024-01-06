@@ -50,12 +50,10 @@ class PartitionCLI(Step):
         l = [len(x.text) for x in m]
         max_len = max(l)
 
-        menu = []
-        i = 0
-        for x in m:
-            menu.append((str(i),
-                         x.text + ' ' * (max_len - l[i] + 2) + x.size_text))
-            i += 1
+        menu = [
+            (str(i), x.text + ' ' * (max_len - l[i] + 2) + x.size_text)
+            for i, x in enumerate(m)
+        ]
         menu.append((str(len(menu)), 'Finish Partitioning'))
 
         res, sel = dialog.menu('Edit partitions below. If not sure, ' +
@@ -74,10 +72,7 @@ class PartitionCLI(Step):
         if sel == len(menu) - 1:
             return 'next'
 
-        menu = []
-        for x in m[sel].ops:
-            menu.append((x, partition_lib.get_text_for_op(x)))
-
+        menu = [(x, partition_lib.get_text_for_op(x)) for x in m[sel].ops]
         if not menu:
             dialog.msgbox('Name: ' + m[sel].text.strip(' ') + '\n' +
                           m[sel].details_atext)

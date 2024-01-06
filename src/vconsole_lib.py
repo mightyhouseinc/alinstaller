@@ -27,13 +27,10 @@ class VConsoleLib():
         self._keymap = ''
 
         l = sorted(os.listdir(self.fontsdir))
-        fonts = []
-        for x in l:
-            if x.endswith('.gz'):
-                fonts.append(x)
+        fonts = [x for x in l if x.endswith('.gz')]
         self._fonts = fonts
 
-        keymaps = glob.glob(self.keymapsdir + '/**/*.map.gz')
+        keymaps = glob.glob(f'{self.keymapsdir}/**/*.map.gz')
         keymaps = [x[len(self.keymapsdir)+1:] for x in keymaps]
         keymaps = sorted(keymaps)
         self._keymaps = keymaps
@@ -48,9 +45,7 @@ class VConsoleLib():
         return self._font
 
     def get_font_full(self):
-        if self._font == '':
-            return ''
-        return self.fontsdir + '/' + self._font
+        return '' if self._font == '' else f'{self.fontsdir}/{self._font}'
 
     def set_font(self, font):
         if font == '':
@@ -66,9 +61,7 @@ class VConsoleLib():
         return self._keymap
 
     def get_keymap_full(self):
-        if self._keymap == '':
-            return ''
-        return self.keymapsdir + '/' + self._keymap
+        return '' if self._keymap == '' else f'{self.keymapsdir}/{self._keymap}'
 
     def set_keymap(self, keymap):
         if keymap == '':
